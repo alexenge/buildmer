@@ -171,7 +171,7 @@ converged <- function (model,singular.ok=FALSE,grad.tol=.1,hess.tol=.01) {
 		# if (any((err <- model@optinfo$conv$lme4$code) != 0)) return(failure('lme4 reports not having converged',err))
 
 		# New criterion based on Ben Bolker's didLmerConverge
-		if signif(max(abs(with(model@optinfo$derivs, solve(Hessian, gradient)))), 3) > 0.001 return(failure('Not converged according to didLmerConverge'))
+		if (signif(max(abs(with(model@optinfo$derivs, solve(Hessian, gradient)))), 3) > 0.001) return(failure('Not converged according to didLmerConverge'))
 
 		if (is.null(model@optinfo$derivs)) return(success('No derivative information available -- succeeding by default (dangerous!)'))
 		grad <- model@optinfo$derivs$gradient
