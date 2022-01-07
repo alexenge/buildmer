@@ -165,8 +165,14 @@ converged <- function (model,singular.ok=FALSE,grad.tol=.1,hess.tol=.01) {
 	if (inherits(model,'merMod')) {
 		if ((err <- model@optinfo$conv$opt) != 0) return(failure('Optimizer reports not having finished',err))
 		if (!length(model@optinfo$conv$lme4)) return(success('No lme4 info available -- succeeding by default (dangerous!)'))
-		if (is.null(model@optinfo$conv$lme4$code) && !singular.ok) return(failure('Singular fit'))
-		if (any((err <- model@optinfo$conv$lme4$code) != 0)) return(failure('lme4 reports not having converged',err))
+		
+		# # Original buildmer criteria based lme4's convergence and singular fit warnings
+		# if (is.null(model@optinfo$conv$lme4$code) && !singular.ok) return(failure('Singular fit'))
+		# if (any((err <- model@optinfo$conv$lme4$code) != 0)) return(failure('lme4 reports not having converged',err))
+
+		# New criterion based on Ben Bolker's didLmerConverge
+		if signif(max(abs(with(model@optinfo$derivs, solve(Hessian, gradient)))), 3) > 0.001 return(failure('Not converged according to didLmerConverge'))
+
 		if (is.null(model@optinfo$derivs)) return(success('No derivative information available -- succeeding by default (dangerous!)'))
 		grad <- model@optinfo$derivs$gradient
 		hess <- model@optinfo$derivs$Hessian
